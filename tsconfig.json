@@ -1,0 +1,18 @@
+{
+  "include": [
+    "src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "allowJs": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "outDir": "dist",
+    "strict": true,
+    "target": "ESNext",
+    "useUnknownInCatchVariables": false
+  }
+}
