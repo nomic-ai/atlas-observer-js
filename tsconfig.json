@@ -1,6 +1,6 @@
 {
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
   ],
   "compilerOptions": {
     "allowJs": false,
@@ -9,7 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "lib": ["ESNext"],
-    "module": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "outDir": "dist",
     "strict": true,
     "target": "ESNext",
