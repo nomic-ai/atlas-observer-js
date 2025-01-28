@@ -6,6 +6,11 @@
   "bin": {
     "atlas-observer": "dist/cli.js"
   },
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
   "devDependencies": {
     "@types/node": "^22.10.10",
     "openai": "^4.80.0",
