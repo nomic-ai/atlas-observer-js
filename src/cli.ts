@@ -72,7 +72,7 @@ async function main() {
     console.log(`\n`);
     console.log(`const client = wrapOpenAI({`);
     console.log(
-      `  dataset: "${orgSlug}/${dataset.created_dataset.slug}", // your dataset`
+      `  datasetId: "${dataset.created_dataset.project_id}", // your dataset ID`
     );
     console.log(`  client: new OpenAI(), // your existing OpenAI client`);
     console.log(`});`);

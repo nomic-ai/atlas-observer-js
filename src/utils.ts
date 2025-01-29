@@ -60,10 +60,10 @@ export type NomicCredentials = {
 export const getNomicCredentials = (): NomicCredentials | null => {
   try {
     // Prefer environment variables
-    if (process.env.NOMIC_TOKEN) {
+    if (process.env.NOMIC_API_KEY) {
       const apiUrl = process.env.NOMIC_API_URL || defaultApiUrl;
       return {
-        token: process.env.NOMIC_TOKEN,
+        token: process.env.NOMIC_API_KEY,
         apiUrl,
       };
     }
@@ -179,8 +179,7 @@ export const createDataset = async (name: string, creds: NomicCredentials) => {
         project_name: name,
         description: "Dataset created by Atlas Observer",
         modality: "text",
-        // TODO specify based on data structure
-        unique_id_field: "row_number",
+        unique_id_field: "id",
         // TODO default to set here
         is_public: false,
         is_public_to_org: true,
@@ -193,36 +192,17 @@ export const createDataset = async (name: string, creds: NomicCredentials) => {
 
 export const uploadDatapoint = async ({
   datasetId,
-  point,
   creds,
+  point,
 }: {
   datasetId: string;
-  point: OpenAIChatDatapoint;
   creds: NomicCredentials;
+  point: OpenAIFlatDatapoint;
 }) => {
-  // TODO With more client wrappers, we'll move OpenAI-specific code to a separate file
-  const flatData: OpenAIFlatDatapoint = {
-    id: point.id,
-    model: point.model,
-    created: point.created,
-    tokens_completion: point.tokens_completion,
-    tokens_prompt: point.tokens_prompt,
-    tokens_total: point.tokens_total,
-    finish_reason: point.output.finish_reason,
-    refusal: point.output.refusal || "",
-    full_input_text: JSON.stringify(point.input),
-    last_input_message: point.input[point.input.length - 1].content,
-    full_conversation: JSON.stringify([
-      ...point.input,
-      { role: "assistant", content: point.output.content },
-    ]),
-    model_response: point.output.content,
-  };
-
   const columnData = Object.fromEntries(
-    Object.keys(flatData).map((k) => [
+    Object.keys(point).map((k) => [
       k,
-      [flatData[k as keyof OpenAIFlatDatapoint]],
+      [point[k as keyof OpenAIFlatDatapoint]],
     ])
   );
 

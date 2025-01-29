@@ -15,7 +15,8 @@
   "devDependencies": {
     "@types/node": "^22.10.10",
     "openai": "^4.80.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   },
   "dependencies": {
     "@nomic-ai/atlas": "^0.12.1-next.6",
