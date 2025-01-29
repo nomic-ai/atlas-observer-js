@@ -1,5 +1,8 @@
 import OpenAI from "openai";
-import { ChatCompletion, ChatCompletionCreateParams } from "openai/resources/index";
+import {
+  ChatCompletion,
+  ChatCompletionCreateParams,
+} from "openai/resources/index";
 import { Stream } from "openai/streaming";
 
 export const wrapOpenAI = ({
@@ -14,17 +17,19 @@ export const wrapOpenAI = ({
   datasetId: string;
 }) => {
   const orig = client.chat.completions.create;
-  client.chat.completions.create = async (...args: [ChatCompletionCreateParams, any]) => {
+  client.chat.completions.create = async (
+    ...args: [ChatCompletionCreateParams, any]
+  ) => {
     const handleResult = async (res: {
-      id: string | number,
-      model: string,
+      id: string | number;
+      model: string;
       usage?: {
-        completion_tokens: number,
-        prompt_tokens: number,
-        total_tokens: number,
+        completion_tokens: number;
+        prompt_tokens: number;
+        total_tokens: number;
       };
       final: {
-        message: string,
+        message: string;
       };
     }) => {
       const dp = {
@@ -34,22 +39,25 @@ export const wrapOpenAI = ({
         tokens_prompt: res.usage?.prompt_tokens ?? 0,
         tokens_total: res.usage?.total_tokens ?? 0,
         text: [
-          ...args[0].messages.map(m => m.content),
+          ...args[0].messages.map((m) => m.content),
           res.final.message,
         ].join("\n\n\n\n"),
       };
       // TODO Assert response status ACCEPTED and empty body?
-      const ingestRes = await fetch(`https://staging-api-atlas.nomic.ai/v1/project/ingest/${datasetId}`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          datapoints: [dp],
-          build_interval: buildInterval,
-        }),
-      });
+      const ingestRes = await fetch(
+        `https://staging-api-atlas.nomic.ai/v1/project/ingest/${datasetId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            datapoints: [dp],
+            build_interval: buildInterval,
+          }),
+        }
+      );
     };
     const rv = await orig.apply(client.chat.completions, args);
     if (rv instanceof Stream) {
