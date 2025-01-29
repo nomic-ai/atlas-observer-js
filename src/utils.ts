@@ -4,6 +4,24 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { AtlasOrganization, AtlasUser, AtlasViewer } from "@nomic-ai/atlas";
 import { components } from "@nomic-ai/atlas/dist/type-gen/openapi";
 
+export type ChatDatapoint = {
+  id: string;
+  model: string;
+  created: number;
+  tokens_completion: number;
+  tokens_prompt: number;
+  tokens_total: number;
+  input: Array<{
+    role: string;
+    content: string;
+  }>;
+  output: {
+    finish_reason: string;
+    content: string;
+    refusal: string | null;
+  };
+};
+
 const getCredentialsPath = () => {
   const nomicDir = join(homedir(), ".nomic");
   const credentialsPath = join(nomicDir, "credentials");
@@ -135,4 +153,14 @@ export const createDataset = async (
   });
 
   return observerDataset;
+};
+
+export const uploadDatapoint = async ({
+  datasetId,
+  point,
+}: {
+  datasetId: string;
+  point: ChatDatapoint;
+}) => {
+  // TODO
 };

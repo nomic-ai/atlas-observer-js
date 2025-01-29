@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import { ChatCompletion, ChatCompletionCreateParams } from "openai/resources/index.mjs";
-import { Stream } from "openai/streaming.mjs";
+import { ChatCompletion, ChatCompletionCreateParams } from "openai/resources/index";
+import { Stream } from "openai/streaming";
 
 export const wrapOpenAI = ({
   apiKey,
