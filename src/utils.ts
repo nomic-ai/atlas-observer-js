@@ -3,8 +3,9 @@ import { join } from "path";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { AtlasOrganization, AtlasUser, AtlasViewer } from "@nomic-ai/atlas";
 import { components } from "@nomic-ai/atlas/dist/type-gen/openapi";
+import { tableFromArrays, tableToIPC, utf8 } from "@uwdata/flechette";
 
-export type ChatDatapoint = {
+export type OpenAIChatDatapoint = {
   id: string;
   model: string;
   created: number;
@@ -23,6 +24,21 @@ export type ChatDatapoint = {
 };
 
 export const defaultApiUrl = "api-atlas.nomic.ai";
+
+export type OpenAIFlatDatapoint = {
+  id: string;
+  model: string;
+  created: number;
+  tokens_completion: number;
+  tokens_prompt: number;
+  tokens_total: number;
+  finish_reason: string;
+  refusal: string;
+  full_input_text: string;
+  last_input_message: string;
+  full_conversation: string;
+  model_response: string;
+};
 
 const getCredentialsPath = () => {
   const nomicDir = join(homedir(), ".nomic");
@@ -181,11 +197,58 @@ export const uploadDatapoint = async ({
   creds,
 }: {
   datasetId: string;
-  point: ChatDatapoint;
+  point: OpenAIChatDatapoint;
   creds: NomicCredentials;
 }) => {
+  // TODO With more client wrappers, we'll move OpenAI-specific code to a separate file
+  const flatData: OpenAIFlatDatapoint = {
+    id: point.id,
+    model: point.model,
+    created: point.created,
+    tokens_completion: point.tokens_completion,
+    tokens_prompt: point.tokens_prompt,
+    tokens_total: point.tokens_total,
+    finish_reason: point.output.finish_reason,
+    refusal: point.output.refusal || "",
+    full_input_text: JSON.stringify(point.input),
+    last_input_message: point.input[point.input.length - 1].content,
+    full_conversation: JSON.stringify([
+      ...point.input,
+      { role: "assistant", content: point.output.content },
+    ]),
+    model_response: point.output.content,
+  };
+
+  const columnData = Object.fromEntries(
+    Object.keys(flatData).map((k) => [
+      k,
+      [flatData[k as keyof OpenAIFlatDatapoint]],
+    ])
+  );
+
+  const table = tableFromArrays(columnData, {
+    types: {
+      id: utf8(),
+      full_input_text: utf8(),
+      last_input_message: utf8(),
+      full_conversation: utf8(),
+      model_response: utf8(),
+    },
+  });
+
+  if (!table.schema.metadata) {
+    table.schema.metadata = new Map();
+  }
+
+  table.schema.metadata.set("project_id", datasetId);
+  table.schema.metadata.set("on_id_conflict_ignore", "true");
+
+  const ipc = tableToIPC(table, { format: "file" });
+
   const viewer = new AtlasViewer({
     apiKey: creds.token,
     apiLocation: creds.apiUrl,
   });
+
+  await viewer.apiCall(`/v1/project/data/add/arrow`, "POST", ipc);
 };
