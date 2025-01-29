@@ -2,44 +2,48 @@
 import prompts from "prompts";
 import {
   createDataset,
-  getNomicToken,
+  defaultApiUrl,
+  getNomicCredentials,
   getOrganizationSlug,
-  saveNomicToken,
+  saveNomicCredentials,
 } from "./utils.js";
 
 async function main() {
-  let token = getNomicToken();
+  let credentials = getNomicCredentials();
 
   let apiQuestion: prompts.PromptObject[] = [
     {
       type: "password",
       name: "apiKey",
-      message: "What is your API key?",
+      message:
+        "Enter your Atlas API key - can be generated at https://atlas.nomic.ai/cli-login",
       validate: (value) => (value.length > 0 ? true : "API key is required"),
     },
   ];
 
   try {
-    if (!token) {
+    if (!credentials) {
       const apiResponse = await prompts(apiQuestion);
       if (apiResponse.apiKey) {
-        saveNomicToken(apiResponse.apiKey);
-        token = apiResponse.apiKey;
+        credentials = saveNomicCredentials(apiResponse.apiKey);
       }
     } else {
       console.log("Using existing API key from credentials");
+      if (credentials.apiUrl && credentials.apiUrl !== defaultApiUrl) {
+        console.log(`Note: Using non-default API URL: ${credentials.apiUrl}`);
+      }
     }
   } catch (error) {
     console.error("Error:", error);
     process.exit(1);
   }
 
-  if (!token) {
+  if (!credentials) {
     console.error("No API key provided");
     process.exit(1);
   }
 
-  const orgSlug = await getOrganizationSlug();
+  const orgSlug = await getOrganizationSlug(credentials);
 
   console.log(`Dataset will be created in organization "${orgSlug}"`);
 
@@ -53,8 +57,12 @@ async function main() {
 
   try {
     const response = await prompts(questions);
+    if (!response.datasetName) {
+      console.error("Dataset name is required");
+      process.exit(1);
+    }
     console.log("Creating dataset...");
-    const dataset = await createDataset(response.datasetName);
+    const dataset = await createDataset(response.datasetName, credentials);
     console.log(`Dataset created: ${orgSlug}/${dataset.created_dataset.slug}`);
     console.log(
       `Insert the following code into your project to use this dataset:`
