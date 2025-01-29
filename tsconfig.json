@@ -12,8 +12,9 @@
     "module": "esnext",
     "moduleResolution": "node",
     "outDir": "dist",
+    "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
   }
 }
