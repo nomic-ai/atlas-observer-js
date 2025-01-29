@@ -22,6 +22,8 @@ export type ChatDatapoint = {
   };
 };
 
+export const defaultApiUrl = "api-atlas.nomic.ai";
+
 const getCredentialsPath = () => {
   const nomicDir = join(homedir(), ".nomic");
   const credentialsPath = join(nomicDir, "credentials");
@@ -39,15 +41,18 @@ export type NomicCredentials = {
   apiUrl: string;
 };
 
-export const getNomicToken = (): NomicCredentials | null => {
+export const getNomicCredentials = (): NomicCredentials | null => {
   try {
+    // Prefer environment variables
     if (process.env.NOMIC_TOKEN) {
-      const apiUrl = process.env.NOMIC_API_URL || "https://api-atlas.nomic.ai";
+      const apiUrl = process.env.NOMIC_API_URL || defaultApiUrl;
       return {
         token: process.env.NOMIC_TOKEN,
         apiUrl,
       };
     }
+
+    // Otherwise, read from file
     const credentialsPath = getCredentialsPath();
     if (!existsSync(credentialsPath)) {
       return null;
@@ -64,17 +69,21 @@ export const getNomicToken = (): NomicCredentials | null => {
   }
 };
 
-export const saveNomicToken = (token: string): void => {
+export const saveNomicCredentials = (
+  token: string,
+  apiUrl: string = defaultApiUrl
+): NomicCredentials => {
   try {
+    // Save to file
     const credentialsPath = getCredentialsPath();
     const credentials = existsSync(credentialsPath)
       ? JSON.parse(readFileSync(credentialsPath, "utf-8"))
       : {};
 
     credentials.token = token;
-    credentials.apiUrl =
-      process.env.NOMIC_API_URL || "https://api-atlas.nomic.ai";
+    credentials.apiUrl = process.env.NOMIC_API_URL || apiUrl;
     writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
+    return credentials;
   } catch (error) {
     console.error("Error saving Nomic token:", error);
     throw error;
