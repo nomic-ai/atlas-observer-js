@@ -34,15 +34,30 @@ const getCredentialsPath = () => {
   return credentialsPath;
 };
 
-export const getNomicToken = (): string | null => {
+export type NomicCredentials = {
+  token: string;
+  apiUrl: string;
+};
+
+export const getNomicToken = (): NomicCredentials | null => {
   try {
+    if (process.env.NOMIC_TOKEN) {
+      const apiUrl = process.env.NOMIC_API_URL || "https://api-atlas.nomic.ai";
+      return {
+        token: process.env.NOMIC_TOKEN,
+        apiUrl,
+      };
+    }
     const credentialsPath = getCredentialsPath();
     if (!existsSync(credentialsPath)) {
       return null;
     }
 
     const credentials = JSON.parse(readFileSync(credentialsPath, "utf-8"));
-    return credentials.token || null;
+    if (!credentials.token) {
+      return null;
+    }
+    return { token: credentials.token, apiUrl: credentials.apiUrl };
   } catch (error) {
     console.error("Error reading Nomic token:", error);
     return null;
@@ -57,6 +72,8 @@ export const saveNomicToken = (token: string): void => {
       : {};
 
     credentials.token = token;
+    credentials.apiUrl =
+      process.env.NOMIC_API_URL || "https://api-atlas.nomic.ai";
     writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2));
   } catch (error) {
     console.error("Error saving Nomic token:", error);
@@ -65,15 +82,13 @@ export const saveNomicToken = (token: string): void => {
 };
 
 export const getOrganizationSlug = async (
-  apiLocation: string = "api-atlas.nomic.ai"
+  creds: NomicCredentials
 ): Promise<string> => {
   // API Keys are only attached to one organization, so we just take the first org from the list.
-  const token = getNomicToken();
-  if (!token) {
-    throw new Error("Nomic token not found");
-  }
-
-  const viewer = new AtlasViewer({ apiKey: token, apiLocation });
+  const viewer = new AtlasViewer({
+    apiKey: creds.token,
+    apiLocation: creds.apiUrl,
+  });
   const user = await new AtlasUser(viewer).withLoadedAttributes();
   if (!user.attr.organizations) {
     throw new Error("User has no organizations");
@@ -102,16 +117,11 @@ const createConnectorDataset = async (
   }) as Promise<components["schemas"]["ConnectorDatasetResponse"]>;
 };
 
-export const createDataset = async (
-  name: string,
-  apiLocation: string = "api-atlas.nomic.ai"
-) => {
-  const token = getNomicToken();
-  if (!token) {
-    throw new Error("Nomic token not found");
-  }
-
-  const viewer = new AtlasViewer({ apiKey: token, apiLocation });
+export const createDataset = async (name: string, creds: NomicCredentials) => {
+  const viewer = new AtlasViewer({
+    apiKey: creds.token,
+    apiLocation: creds.apiUrl,
+  });
   const user = await new AtlasUser(viewer).withLoadedAttributes();
   const orgId = user.attr.organizations?.[0]?.organization_id!;
   const org = await new AtlasOrganization(orgId, viewer).withLoadedAttributes();
@@ -133,24 +143,25 @@ export const createDataset = async (
     });
   }
 
-  // Create the dataset
-  let observerDataset;
-
-  observerDataset = await createConnectorDataset(viewer, observerConnector.id, {
-    connector_name: CONNECTOR_NAME,
-    creation_params: {},
-    create_dataset_params: {
-      organization_id: org.id,
-      project_name: name,
-      description: "Dataset created by Atlas Observer",
-      modality: "text",
-      // TODO specify based on data structure
-      unique_id_field: "row_number",
-      // TODO default to set here
-      is_public: false,
-      is_public_to_org: true,
-    },
-  });
+  const observerDataset = await createConnectorDataset(
+    viewer,
+    observerConnector.id,
+    {
+      connector_name: CONNECTOR_NAME,
+      creation_params: {},
+      create_dataset_params: {
+        organization_id: org.id,
+        project_name: name,
+        description: "Dataset created by Atlas Observer",
+        modality: "text",
+        // TODO specify based on data structure
+        unique_id_field: "row_number",
+        // TODO default to set here
+        is_public: false,
+        is_public_to_org: true,
+      },
+    }
+  );
 
   return observerDataset;
 };
@@ -158,9 +169,14 @@ export const createDataset = async (
 export const uploadDatapoint = async ({
   datasetId,
   point,
+  creds,
 }: {
   datasetId: string;
   point: ChatDatapoint;
+  creds: NomicCredentials;
 }) => {
-  // TODO
+  const viewer = new AtlasViewer({
+    apiKey: creds.token,
+    apiLocation: creds.apiUrl,
+  });
 };
