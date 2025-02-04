@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run clean && tsc && chmod +x dist/cli.js",
     "clean": "rm -rf dist",
+    "test": "vitest",
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
