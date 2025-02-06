@@ -1,4 +1,4 @@
-# @nomic/atlas-observer
+# @nomic-ai/atlas-observer
 
 `atlas-observer` is a library for automatically uploading LLM chat data to Atlas. From there, you can view data maps of the conversations taking place, and more.
 
@@ -38,7 +38,7 @@ Now that the library is installed and your environment is set up, you can add th
 
 ```typescript
 import { OpenAI } from "openai";
-import { wrapOpenAI } from "@nomic/atlas-observer";
+import { wrapOpenAI } from "@nomic-ai/atlas-observer";
 
 // Wrap your OpenAI client.
 const client = wrapOpenAI({
