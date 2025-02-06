@@ -42,7 +42,7 @@ import { wrapOpenAI } from "@nomic/atlas-observer";
 
 // Wrap your OpenAI client.
 const client = wrapOpenAI({
-  dataset: "my-org/my-llm-chats",
+  datasetId: "2C0DA018-94BF-4A7E-9A90-616FC3773A4E",
   // Initialize the OpenAI client just as you normally would.
   client: new OpenAI(),
 });
