@@ -28,7 +28,7 @@ async function main() {
         credentials = saveNomicCredentials(apiResponse.apiKey);
       }
     } else {
-      console.log("Using existing API key from credentials");
+      // console.log("Using existing API key from credentials");
       if (credentials.apiUrl && credentials.apiUrl !== defaultApiUrl) {
         console.log(`Note: Using non-default API URL: ${credentials.apiUrl}`);
       }
