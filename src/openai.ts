@@ -5,7 +5,11 @@ import {
   ChatCompletionCreateParams,
 } from "openai/resources/index";
 import { Stream } from "openai/streaming";
-import { getNomicCredentials, OpenAIFlatDatapoint, uploadDatapoint } from "./utils";
+import {
+  getNomicCredentials,
+  OpenAIFlatDatapoint,
+  uploadDatapoint,
+} from "./utils.js";
 
 export const wrapOpenAI = ({
   client,
@@ -39,9 +43,16 @@ export const wrapOpenAI = ({
       };
     }) => {
       // TODO With more client wrappers, we'll move OpenAI-specific code to a separate file
-      const messageContent = (m: {
-        content?: string | unknown;
-      } | unknown[] | undefined | null | string) => {
+      const messageContent = (
+        m:
+          | {
+              content?: string | unknown;
+            }
+          | unknown[]
+          | undefined
+          | null
+          | string
+      ) => {
         if (!m || Array.isArray(m)) {
           return "";
         }
@@ -72,7 +83,7 @@ export const wrapOpenAI = ({
         full_input_text: JSON.stringify(inputMessages),
         last_input_message: messageContent(args[0].messages.at(-1)),
         full_conversation: JSON.stringify([
-            ...inputMessages,
+          ...inputMessages,
           { role: "assistant", content: res.final.message },
         ]),
         model_response: res.final.message,
@@ -81,7 +92,7 @@ export const wrapOpenAI = ({
         datasetId,
         creds,
         point: flatData,
-      })
+      });
     };
     const rv = await orig.apply(client.chat.completions, args);
     if (rv instanceof Stream) {
@@ -103,7 +114,7 @@ export const wrapOpenAI = ({
             total_tokens: l?.usage?.total_tokens ?? 0,
           },
           final: {
-            message: response.map(c => c.choices[0].delta.content).join(""),
+            message: response.map((c) => c.choices[0].delta.content).join(""),
             reason: l?.choices[0].finish_reason ?? "",
             refusal: l?.choices[0].delta.refusal ?? "",
           },
