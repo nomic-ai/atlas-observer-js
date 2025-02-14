@@ -1,6 +1,6 @@
 {
   "name": "@nomic-ai/atlas-observer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Send LLM responses to Nomic Atlas",
   "main": "dist/main.js",
   "type": "module",
