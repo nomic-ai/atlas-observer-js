@@ -1,9 +1,9 @@
 import { test, expect } from "vitest";
-import { wrapOpenAI } from "./openai";
+import { wrapOpenAI } from "./openai.js";
 import OpenAI from "openai";
-import { createDataset, getNomicCredentials } from "./utils";
+import { createDataset, getNomicCredentials } from "./utils.js";
 import { AtlasDataset, AtlasViewer } from "@nomic-ai/atlas";
-import { AtlasObserver } from "./observer";
+import { AtlasObserver } from "./observer.js";
 
 test(
   "upload openai datapoints",

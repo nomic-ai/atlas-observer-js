@@ -12,7 +12,7 @@ import {
   getDatasetSchema,
   getNomicCredentials,
   NomicCredentials,
-} from "./utils";
+} from "./utils.js";
 import { AtlasViewer } from "@nomic-ai/atlas";
 import { ulid } from "ulid";
 
