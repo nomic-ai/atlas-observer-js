@@ -1,10 +1,20 @@
 import { homedir } from "os";
 import { join } from "path";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
-import { AtlasOrganization, AtlasUser, AtlasViewer } from "@nomic-ai/atlas";
+import {
+  AtlasOrganization,
+  AtlasUser,
+  AtlasViewer,
+  AtlasDataset,
+} from "@nomic-ai/atlas";
 import { components } from "@nomic-ai/atlas/dist/type-gen/openapi";
-import { tableFromArrays, tableToIPC, utf8 } from "@uwdata/flechette";
-
+import {
+  tableFromArrays,
+  tableFromIPC,
+  tableToIPC,
+  utf8,
+} from "@uwdata/flechette";
+import { ulid } from "ulid";
 export type OpenAIChatDatapoint = {
   id: string;
   model: string;
@@ -179,7 +189,7 @@ export const createDataset = async (name: string, creds: NomicCredentials) => {
         project_name: name,
         description: "Dataset created by Atlas Observer",
         modality: "text",
-        unique_id_field: "id",
+        unique_id_field: "_internal_id",
         // TODO default to set here
         is_public: false,
         is_public_to_org: true,
@@ -188,6 +198,29 @@ export const createDataset = async (name: string, creds: NomicCredentials) => {
   );
 
   return observerDataset;
+};
+
+export const getDatasetSchema = async (
+  datasetId: string,
+  creds: NomicCredentials
+) => {
+  const viewer = new AtlasViewer({
+    apiKey: creds.token,
+    apiLocation: creds.apiUrl,
+  });
+
+  const dataset = await new AtlasDataset(
+    datasetId,
+    viewer
+  ).withLoadedAttributes();
+  const base64Schema = dataset.attr.schema;
+  if (!base64Schema) {
+    return null;
+  }
+  const schemaBuffer = Buffer.from(base64Schema, "base64");
+  const array = new Uint8Array(schemaBuffer);
+  const table = tableFromIPC(array);
+  return table.schema;
 };
 
 export const uploadDatapoint = async ({
@@ -200,14 +233,15 @@ export const uploadDatapoint = async ({
   point: OpenAIFlatDatapoint;
 }) => {
   const columnData = Object.fromEntries(
-    Object.keys(point).map((k) => [
-      k,
-      [point[k as keyof OpenAIFlatDatapoint]],
-    ])
+    Object.keys(point).map((k) => [k, [point[k as keyof OpenAIFlatDatapoint]]])
   );
+
+  const internalId = ulid();
+  columnData["_internal_id"] = [internalId];
 
   const table = tableFromArrays(columnData, {
     types: {
+      _internal_id: utf8(),
       id: utf8(),
       full_input_text: utf8(),
       last_input_message: utf8(),
