@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/nomic-ai/atlas-observer-js/compare/v0.1.1...v0.2.0) (2025-02-14)
+
+
+### Features
+
+* general observer class ([#18](https://github.com/nomic-ai/atlas-observer-js/issues/18)) ([e176fa8](https://github.com/nomic-ai/atlas-observer-js/commit/e176fa82ced61a71f1aff165021a1a6d62799086))
+
+
+### Bug Fixes
+
+* export observer ([#20](https://github.com/nomic-ai/atlas-observer-js/issues/20)) ([7495fa2](https://github.com/nomic-ai/atlas-observer-js/commit/7495fa2daea1f1e1218b92b497dc8186dd404c60))
+* openai dependency ([#22](https://github.com/nomic-ai/atlas-observer-js/issues/22)) ([c3b7b87](https://github.com/nomic-ai/atlas-observer-js/commit/c3b7b8726088698d9785d2ba80372a70dbe51c5d))
+* proper file extensions ([#21](https://github.com/nomic-ai/atlas-observer-js/issues/21)) ([907d401](https://github.com/nomic-ai/atlas-observer-js/commit/907d401d0f0e8f08a53e06e63a773c79b851e938))
+
 ## 0.1.1 (2025-02-14)
 
 
