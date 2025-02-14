@@ -27,6 +27,7 @@
     "@nomic-ai/atlas": "^0.12.1-next.6",
     "@types/prompts": "^2.4.9",
     "@uwdata/flechette": "^1.1.2",
-    "prompts": "^2.4.2"
+    "prompts": "^2.4.2",
+    "ulid": "^2.3.0"
   }
 }
