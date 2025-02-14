@@ -68,7 +68,7 @@ async function main() {
       `Insert the following code into your project to use this dataset:`
     );
     console.log(`\n`);
-    console.log(`import { wrapOpenAI } from "@nomic/atlas-observer";`);
+    console.log(`import { wrapOpenAI } from "@nomic-ai/atlas-observer";`);
     console.log(`\n`);
     console.log(`const client = wrapOpenAI({`);
     console.log(
