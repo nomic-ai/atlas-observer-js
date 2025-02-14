@@ -18,7 +18,7 @@ Go to [Nomic Atlas](https://atlas.nomic.ai) and create an account or log in. Thi
 
 2. Run the following command to authenticate and create your empty dataset:
 
-   `npx atlas-observer`
+   `npx @nomic-ai/atlas-observer`
 
    Here you will be prompted to enter your Atlas API key - click the link in the terminal prompt or [here](https://atlas.nomic.ai/cli-login) to create one. This key will be saved to your `~/.nomic/credentials` file.
 
