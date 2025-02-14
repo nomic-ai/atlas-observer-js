@@ -19,7 +19,6 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.10",
-    "openai": "^4.80.0",
     "typescript": "^5.7.3",
     "vitest": "^3.0.4"
   },
@@ -27,6 +26,7 @@
     "@nomic-ai/atlas": "^0.12.1-next.6",
     "@types/prompts": "^2.4.9",
     "@uwdata/flechette": "^1.1.2",
+    "openai": "^4.85.1",
     "prompts": "^2.4.2",
     "ulid": "^2.3.0"
   }
